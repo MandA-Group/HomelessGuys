@@ -10,26 +10,34 @@ public class CameraController : MonoBehaviour
     [SerializeField] private Vector3 _offset = new Vector3(-1.5f, 7, -20);
     [SerializeField] private float _sensitivity = 3;
     [SerializeField] private float _limit = 80;
-    [SerializeField] private float _zoom = 0.25f;
     [SerializeField] private float _zoomMax = 20;
     [SerializeField] private float _zoomMin = 5;
     private float _x, _y;
 
     void Start () 
     {
+        
         _limit = Mathf.Abs(_limit);
         if(_limit > 90) _limit = 90;
-        //_offset = new Vector3(_offset.x, _offset.y, -Mathf.Abs(_zoomMax));
         transform.position = _target.position + _offset;
+    }
+
+    private void Update()
+    {
+        if (Input.GetKey(KeyCode.Mouse1))
+        {
+            _offset.z = _zoomMin;
+        }
+        else
+        {
+            _offset.z = -Mathf.Abs(_zoomMax);
+        }
     }
 
     void LateUpdate ()
     {
-        var horizontal = Input.GetAxis("Mouse X");
-        var vertical = Input.GetAxis("Mouse Y");
-        if(Input.GetAxis("Mouse ScrollWheel") > 0) _offset.z += _zoom;
-        else if(Input.GetAxis("Mouse ScrollWheel") < 0) _offset.z -= _zoom;
-        _offset.z = Mathf.Clamp(_offset.z, -Mathf.Abs(_zoomMax), -Mathf.Abs(_zoomMin));
+        var horizontal = Input.GetAxis(DataConstants.HORIZONTAL);
+        var vertical = Input.GetAxis(DataConstants.VERTICAL);
 
         _x = transform.localEulerAngles.y + horizontal * _sensitivity;
         _y += vertical * _sensitivity;
