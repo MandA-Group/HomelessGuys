@@ -47,3 +47,4 @@ public class CameraController : MonoBehaviour
         transform.position = transform.localRotation * _offset + _target.position;
     }
 }
+

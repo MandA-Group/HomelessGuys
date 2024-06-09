@@ -6,74 +6,51 @@ using UnityEngine.Serialization;
 
 public class PlayerController : MonoBehaviour
 {
-    [SerializeField] private Rigidbody _rigidbody;
+    [SerializeField] private CharacterController _characterController;
     [SerializeField] private float _baseSpeed = 25f;
     [SerializeField] private float _sprint = 35f;
-    [SerializeField] private float _rotationSpeed = 60f;
-    [SerializeField] private float _jumpForce = 1f;
+    [SerializeField] private float _jumpForce = 10f;
+    [SerializeField] private float _gravity = 20f;
+    
+    private Vector3 moveDirection = Vector3.zero;
     private float _currentSpeed;
-    private bool isGrounded;
+    private int _counter;
     
     private void Start()
     {
         _currentSpeed = _baseSpeed;
-        _rigidbody.constraints = RigidbodyConstraints.FreezeRotation;
         Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
     }
 
     private void Update()
     {
         Move();
-        Jump();
         Run();
     }
     
     private void Move()
     {
-        var step = _currentSpeed * Time.deltaTime;
-        var rotationStep = _rotationSpeed * Time.deltaTime;
-        if (Input.GetKey(KeyCode.W))
+        if (_characterController.isGrounded)
         {
-            transform.Translate(Vector3.forward * step);
+            _counter = 1;
+            var verticalInput = Input.GetAxis("Vertical");
+            var horizontalInput = Input.GetAxis("Horizontal");
+
+            moveDirection = new Vector3(horizontalInput, 0, verticalInput);
+            moveDirection = transform.TransformDirection(moveDirection);
+            moveDirection *= _currentSpeed;
         }
 
-        if (Input.GetKey(KeyCode.S))
+        if (Input.GetButtonDown("Jump") && _counter == 1)
         {
-            transform.Translate(Vector3.back * step);
+            moveDirection.y = _jumpForce;
+            _counter--;
         }
 
-        if (Input.GetKey(KeyCode.A))
-        {
-            transform.Translate(Vector3.left * step);
-        }
-        
-        if (Input.GetKey(KeyCode.D))
-        {
-            transform.Translate(Vector3.right * step);
-        }
+        moveDirection.y -= _gravity * Time.deltaTime;
+        _characterController.Move(moveDirection * Time.deltaTime);
     }
-    private void Jump()
-    {
-        if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
-        {
-            _rigidbody.AddForce(Vector3.up * _jumpForce, ForceMode.Impulse);
-        }
-    }
-    private void OnCollisionEnter(Collision collision)
-    {
-        if (collision.gameObject.CompareTag(DataConstants.TAG_FLOOR))
-        {
-            isGrounded = true;
-        }
-    }
-    private void OnCollisionExit(Collision collision)
-    {
-        if (collision.gameObject.CompareTag(DataConstants.TAG_FLOOR))
-        {
-            isGrounded = false;
-        }
-    }
+    
 
     private void Run()
     {
