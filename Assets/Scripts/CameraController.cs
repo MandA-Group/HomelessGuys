@@ -1,8 +1,6 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 public class CameraController : MonoBehaviour
 {
@@ -20,13 +18,14 @@ public class CameraController : MonoBehaviour
         _limit = Mathf.Abs(_limit);
         if(_limit > 90) _limit = 90;
         transform.position = _target.position + _offset;
+        Cursor.lockState = CursorLockMode.Locked;
     }
 
     private void Update()
     {
         if (Input.GetKey(KeyCode.Mouse1))
         {
-            _offset.z = _zoomMin;
+            _offset.z = -Mathf.Abs(_zoomMin);
         }
         else
         {
@@ -36,8 +35,8 @@ public class CameraController : MonoBehaviour
 
     void LateUpdate ()
     {
-        var horizontal = Input.GetAxis(DataConstants.HORIZONTAL);
-        var vertical = Input.GetAxis(DataConstants.VERTICAL);
+        var horizontal = Input.GetAxis("Mouse X");
+        var vertical = Input.GetAxis("Mouse Y");
 
         _x = transform.localEulerAngles.y + horizontal * _sensitivity;
         _y += vertical * _sensitivity;
@@ -47,4 +46,3 @@ public class CameraController : MonoBehaviour
         transform.position = transform.localRotation * _offset + _target.position;
     }
 }
-
